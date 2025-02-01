@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import SwiftUI
 
 final class ScoreService: ObservableObject {
     @Published var leftScore: Int = 0
@@ -8,7 +8,7 @@ final class ScoreService: ObservableObject {
     func increaseLeftScore() {
         leftScore += 1
     }
-
+    
     func increaseRightScore() {
         rightScore += 1
     }

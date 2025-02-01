@@ -1,24 +1,31 @@
-//
-//  ContentView.swift
-//  scoreboard
-//
-//  Created by Craig Sheppard on 2025-02-01.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var appConfig = AppConfiguration()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        GeometryReader { geometry in
+            if geometry.size.width > geometry.size.height {
+                // Landscape: Show the scoreboard
+                ScoreboardView()
+                    .environmentObject(appConfig)
+            } else {
+                // Portrait: Show the configuration view
+                ConfigureView()
+                    .environmentObject(appConfig)
+            }
         }
-        .padding()
+        .ignoresSafeArea()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            ContentView()
+                .previewInterfaceOrientation(.landscapeLeft)
+            ContentView()
+                .previewInterfaceOrientation(.portrait)
+        }
+    }
 }

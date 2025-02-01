@@ -1,52 +1,58 @@
 import SwiftUI
 
 struct ConfigureTeamComponent: View {
-    @State private var teamName: String = ""
-    @State private var primaryColor: Color = .red
-    @State private var secondaryColor: Color = .blue
-    @State private var score: Int = 0
+    @ObservedObject var team: TeamConfiguration
     @State private var showScoreAdjusters: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Team name input
-            TextField("Team Name", text: $teamName)
+            TextField("Team Name", text: $team.teamName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
-            // Color pickers for primary and secondary colors
+            // Color pickers for primary and secondary colours
             HStack {
                 VStack {
                     Text("Primary Color")
-                    ColorPicker("", selection: $primaryColor)
+                    ColorPicker("", selection: $team.primaryColor)
                         .labelsHidden()
                 }
                 VStack {
                     Text("Secondary Color")
-                    ColorPicker("", selection: $secondaryColor)
+                    ColorPicker("", selection: $team.secondaryColor)
                         .labelsHidden()
                 }
             }
             
-            // Score display – tap to reveal adjusters
+            // Score display using outlined Jersey font; tap to toggle score adjusters
             VStack(alignment: .leading) {
-                Text("Score: \(score)")
-                    .font(.title)
-                    .onTapGesture {
-                        withAnimation {
-                            showScoreAdjusters.toggle()
-                        }
+                OutlinedText(
+                    text: "\(team.score)",
+                    fontName: "JerseyM54",   // Use your actual internal font name
+                    fontSize: 40,
+                    textColor: .white,
+                    strokeColor: UIColor(team.secondaryColor),
+                    strokeWidth: -2.0,
+                    textAlignment: .center,
+                    kern: 1.0              // Adjust kerning for small text if desired
+                )
+                .contentShape(Rectangle())  // Ensure the full area is tappable
+                .onTapGesture {
+                    withAnimation {
+                        showScoreAdjusters.toggle()
                     }
+                }
                 
                 if showScoreAdjusters {
                     HStack {
-                        Button(action: { score -= 1 }) {
+                        Button(action: { team.score -= 1 }) {
                             Text("-")
                                 .font(.largeTitle)
                                 .padding()
                                 .background(Color.gray.opacity(0.2))
                                 .cornerRadius(8)
                         }
-                        Button(action: { score += 1 }) {
+                        Button(action: { team.score += 1 }) {
                             Text("+")
                                 .font(.largeTitle)
                                 .padding()
@@ -65,6 +71,7 @@ struct ConfigureTeamComponent: View {
 
 struct ConfigureTeamComponent_Previews: PreviewProvider {
     static var previews: some View {
-        ConfigureTeamComponent()
+        ConfigureTeamComponent(team: TeamConfiguration(teamName: "Test", primaryColor: .red, secondaryColor: .blue))
+            .previewLayout(.sizeThatFits)
     }
 }

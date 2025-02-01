@@ -1,33 +1,45 @@
 import SwiftUI
 
 struct ScoreboardView: View {
-    @StateObject private var scoreService = ScoreService()
+    @EnvironmentObject var appConfig: AppConfiguration
     
     var body: some View {
         HStack(spacing: 0) {
-            // Left half – red background
+            // Home team side (left)
             ZStack {
-                Color.red
-                Text("\(scoreService.leftScore)")
-                    .font(.system(size: 100, weight: .bold))
-                    .foregroundColor(.white)
+                appConfig.homeTeam.primaryColor
+                OutlinedText(
+                    text: "\(appConfig.homeTeam.score)",
+                    fontName: "JerseyM54",   // Use your actual internal font name
+                    fontSize: 175,
+                    textColor: .white,
+                    strokeColor: UIColor(appConfig.homeTeam.secondaryColor),
+                    strokeWidth: -7.0,
+                    textAlignment: .center,
+                    kern: 2.0              // Increased kerning between numbers
+                )
+                .padding(10)             // Extra padding for breathing room
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onTapGesture {
-                scoreService.increaseLeftScore()
-            }
+            .onTapGesture { appConfig.homeTeam.score += 1 }
             
-            // Right half – blue background
+            // Away team side (right)
             ZStack {
-                Color.blue
-                Text("\(scoreService.rightScore)")
-                    .font(.system(size: 100, weight: .bold))
-                    .foregroundColor(.white)
+                appConfig.awayTeam.primaryColor
+                OutlinedText(
+                    text: "\(appConfig.awayTeam.score)",
+                    fontName: "JerseyM54",   // Use your actual internal font name
+                    fontSize: 175,
+                    textColor: .white,
+                    strokeColor: UIColor(appConfig.awayTeam.secondaryColor),
+                    strokeWidth: -7.0,
+                    textAlignment: .center,
+                    kern: 2.0              // Increased kerning between numbers
+                )
+                .padding(10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onTapGesture {
-                scoreService.increaseRightScore()
-            }
+            .onTapGesture { appConfig.awayTeam.score += 1 }
         }
         .ignoresSafeArea()
     }
@@ -36,6 +48,7 @@ struct ScoreboardView: View {
 struct ScoreboardView_Previews: PreviewProvider {
     static var previews: some View {
         ScoreboardView()
+            .environmentObject(AppConfiguration())
             .previewInterfaceOrientation(.landscapeLeft)
     }
 }
