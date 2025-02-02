@@ -6,9 +6,8 @@ struct CodableColor: Codable {
     let green: Double
     let blue: Double
     let alpha: Double
-    
+
     init(color: Color) {
-        // Convert to UIColor to extract components
         let uiColor = UIColor(color)
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
@@ -17,16 +16,18 @@ struct CodableColor: Codable {
         self.blue = Double(blue)
         self.alpha = Double(alpha)
     }
-    
+
     func toColor() -> Color {
-        return Color(UIColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(alpha)))
+        Color(UIColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(alpha)))
     }
 }
+
 
 // A codable representation for a team.
 struct CodableTeam: Codable {
     let teamName: String
     let primaryColor: CodableColor
     let secondaryColor: CodableColor
+    let fontColor: CodableColor
     let score: Int
 }
