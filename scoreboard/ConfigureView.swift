@@ -8,7 +8,7 @@ struct ConfigureView: View {
     var body: some View {
         VStack(spacing: 16) {
             // Header with extra top padding
-            Text("Configure Teams")
+            Text("Today's Game")
                 .font(.largeTitle)
                 .padding(.top, 60)
             
