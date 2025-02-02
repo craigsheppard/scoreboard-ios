@@ -91,7 +91,7 @@ struct ScoreView: View {
 
     private func triggerFlash() {
         flashColor = team.secondaryColor.opacity(0.4)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             flashColor = nil
         }
     }

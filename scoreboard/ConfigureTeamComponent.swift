@@ -6,6 +6,8 @@ struct ConfigureTeamComponent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             TextField("Team Name", text: $team.teamName)
+                .font(.title2) // Increased font size
+                .padding(8) // Added padding for better touch experience
                 .textFieldStyle(RoundedBorderTextFieldStyle())
 
             HStack {
