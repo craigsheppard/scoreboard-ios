@@ -5,7 +5,14 @@ struct ScoreView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var swipeCompleted: Bool = false
     @State private var flashColor: Color? = nil
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
+    @EnvironmentObject var appConfig: AppConfiguration
     private let swipeThreshold: CGFloat = 123
+    
+    // Determine if this is the home or away team view
+    private var isHomeTeam: Bool {
+        return team.teamName == appConfig.homeTeam.teamName
+    }
 
     var body: some View {
         ZStack {
@@ -69,6 +76,11 @@ struct ScoreView: View {
         team.score += 1
         triggerHapticFeedback()
         triggerFlash()
+        
+        // Update Live Activity after score change
+        if liveActivityManager.currentActivity != nil {
+            liveActivityManager.updateLiveActivity(appConfig: appConfig)
+        }
     }
 
     private func decreaseScore() {
@@ -76,6 +88,11 @@ struct ScoreView: View {
             team.score -= 1
             triggerHapticFeedback()
             triggerFlash()
+            
+            // Update Live Activity after score change
+            if liveActivityManager.currentActivity != nil {
+                liveActivityManager.updateLiveActivity(appConfig: appConfig)
+            }
         }
     }
 
@@ -100,6 +117,8 @@ struct ScoreView: View {
 struct ScoreView_Previews: PreviewProvider {
     static var previews: some View {
         ScoreView(team: TeamConfiguration(teamName: "Test", primaryColor: .red, secondaryColor: .blue, fontColor: .white))
+            .environmentObject(LiveActivityManager())
+            .environmentObject(AppConfiguration())
             .previewLayout(.sizeThatFits)
     }
 }
