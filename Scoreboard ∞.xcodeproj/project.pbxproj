@@ -27,6 +27,7 @@
 		441367942D4E9B7800718268 /* Scoreboard ∞.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Scoreboard ∞.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		441367A42D4E9B7A00718268 /* Scoreboard ∞Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Scoreboard ∞Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		441367AE2D4E9B7A00718268 /* Scoreboard ∞UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Scoreboard ∞UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		44A5AB072D7380BC0050E08A /* Scoreboard ∞.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Scoreboard ∞.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +89,7 @@
 		4413678B2D4E9B7800718268 = {
 			isa = PBXGroup;
 			children = (
+				44A5AB072D7380BC0050E08A /* Scoreboard ∞.entitlements */,
 				441367962D4E9B7800718268 /* scoreboard */,
 				441367A72D4E9B7A00718268 /* scoreboardTests */,
 				441367B12D4E9B7A00718268 /* scoreboardUITests */,
@@ -406,6 +408,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Scoreboard ∞.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -438,6 +441,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Scoreboard ∞.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
