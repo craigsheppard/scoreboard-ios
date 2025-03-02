@@ -7,18 +7,20 @@ class TeamConfiguration: ObservableObject, Codable {
     @Published var secondaryColor: Color
     @Published var fontColor: Color
     @Published var score: Int
+    @Published var savedTeamId: UUID? // Link to the savedTeam this configuration is based on
 
     // MARK: - Codable Implementation
     enum CodingKeys: CodingKey {
-        case teamName, primaryColor, secondaryColor, fontColor, score
+        case teamName, primaryColor, secondaryColor, fontColor, score, savedTeamId
     }
 
-    init(teamName: String, primaryColor: Color, secondaryColor: Color, fontColor: Color, score: Int = 0) {
+    init(teamName: String, primaryColor: Color, secondaryColor: Color, fontColor: Color, score: Int = 0, savedTeamId: UUID? = nil) {
         self.teamName = teamName
         self.primaryColor = primaryColor
         self.secondaryColor = secondaryColor
         self.fontColor = fontColor
         self.score = score
+        self.savedTeamId = savedTeamId
     }
 
     required init(from decoder: Decoder) throws {
@@ -29,6 +31,7 @@ class TeamConfiguration: ObservableObject, Codable {
         self.secondaryColor = try container.decode(CodableColor.self, forKey: .secondaryColor).toColor()
         self.fontColor = try container.decode(CodableColor.self, forKey: .fontColor).toColor()
         self.score = try container.decode(Int.self, forKey: .score)
+        self.savedTeamId = try container.decodeIfPresent(UUID.self, forKey: .savedTeamId)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -39,6 +42,7 @@ class TeamConfiguration: ObservableObject, Codable {
         try container.encode(CodableColor(color: secondaryColor), forKey: .secondaryColor)
         try container.encode(CodableColor(color: fontColor), forKey: .fontColor)
         try container.encode(score, forKey: .score)
+        try container.encodeIfPresent(savedTeamId, forKey: .savedTeamId)
     }
 }
 

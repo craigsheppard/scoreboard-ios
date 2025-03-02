@@ -3,45 +3,65 @@ import UIKit
 
 struct ConfigureView: View {
     @EnvironmentObject var appConfig: AppConfiguration
-    @State private var showingResetAlert = false
+    @State private var showingNewGameAlert = false
+    @State private var isGameTypeSelectionPresented = false
+    @State private var selectedGameType: GameType = .hockey
     
     var body: some View {
         VStack(spacing: 16) {
-            // Header with extra top padding
-            Text("Today's Game")
-                .font(.largeTitle)
-                .padding(.top, 60)
+            // Header with game type selection
+            VStack {
+                Text("Today's Game")
+                    .font(.largeTitle)
+                    .padding(.top, 40)
+                
+                Button(action: {
+                    selectedGameType = appConfig.currentGameType
+                    isGameTypeSelectionPresented = true
+                }) {
+                    HStack {
+                        Text(appConfig.currentGameType.rawValue)
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                        
+                        Image(systemName: "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(BorderlessButtonStyle())
+            }
             
             // Two team configuration components stacked vertically
             VStack(spacing: 16) {
-                ConfigureTeamComponent(team: appConfig.homeTeam)
-                ConfigureTeamComponent(team: appConfig.awayTeam)
+                ConfigureTeamComponent(team: appConfig.homeTeam, isHomeTeam: true)
+                ConfigureTeamComponent(team: appConfig.awayTeam, isHomeTeam: false)
             }
-            .padding(.top, 20)
+            .padding(.top, 10)
             
             Spacer()
             
-            // Reset Score button
+            // New Game button (replacing Reset Score)
             Button(action: {
-                showingResetAlert = true
+                showingNewGameAlert = true
             }) {
-                Text("Reset Score")
+                Text("New Game")
                     .font(.headline)
                     .padding(8)
                     .frame(maxWidth: .infinity)
-                    .background(Color.red.opacity(0.7))
+                    .background(Color.blue.opacity(0.7))
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
             .padding(.horizontal)
-            .alert(isPresented: $showingResetAlert) {
+            .alert(isPresented: $showingNewGameAlert) {
                 Alert(
-                    title: Text("Reset Score"),
-                    message: Text("Are you sure?"),
-                    primaryButton: .destructive(Text("Reset")) {
+                    title: Text("New Game"),
+                    message: Text("Start a new game? This will reset the score."),
+                    primaryButton: .default(Text("New Game")) {
                         // Reset scores for both teams
-                        appConfig.homeTeam.score = 0
-                        appConfig.awayTeam.score = 0
+                        appConfig.newGame()
                     },
                     secondaryButton: .cancel()
                 )
@@ -67,6 +87,13 @@ struct ConfigureView: View {
             .padding(.horizontal)
         }
         .padding()
+        .sheet(isPresented: $isGameTypeSelectionPresented) {
+            GameTypeSelectionView(
+                selectedGameType: $selectedGameType,
+                isGameTypeSelectionPresented: $isGameTypeSelectionPresented
+            )
+            .environmentObject(appConfig)
+        }
     }
 }
 
