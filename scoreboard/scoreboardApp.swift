@@ -8,14 +8,19 @@
 import SwiftUI
 import UserNotifications
 import CloudKit
+import ActivityKit
 
 @main
 struct scoreboardApp: App {
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
+    @StateObject private var liveActivityManager = LiveActivityManager()
+    @StateObject private var appConfig = AppConfiguration()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appConfig)
+                .environmentObject(liveActivityManager)
         }
     }
 }
@@ -54,5 +59,17 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for remote notifications: \(error.localizedDescription)")
+    }
+    
+    // Handle opening the app from a Live Activity
+    func application(_ application: UIApplication, 
+                    continue userActivity: NSUserActivity, 
+                    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Handle opening the app from a Live Activity
+        if userActivity.activityType == "com.apple.ActivityKit.activity" {
+            // App opened from Live Activity
+            return true
+        }
+        return false
     }
 }
