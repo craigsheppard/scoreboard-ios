@@ -10,31 +10,38 @@ struct ConfigureTeamComponent: View {
     
     // Check if the current team has unsaved changes
     private var hasUnsavedChanges: Bool {
+        // If we have a lastSavedState record, compare current values to it
+        if let lastSaved = team.lastSavedState {
+            // Check if any property has changed since the last save
+            let nameChanged = lastSaved.name != team.teamName
+            let primaryColorChanged = lastSaved.primaryColor != team.primaryColor.description
+            let secondaryColorChanged = lastSaved.secondaryColor != team.secondaryColor.description
+            let fontColorChanged = lastSaved.fontColor != team.fontColor.description
+            
+            return nameChanged || primaryColorChanged || secondaryColorChanged || fontColorChanged
+        }
+        
+        // If we have a savedTeamId but no lastSavedState (shouldn't happen normally)
         if let savedTeamId = team.savedTeamId {
             // Find the saved team with this ID
             if let existingTeam = appConfig.getTeams(for: appConfig.currentGameType)
                 .first(where: { $0.id == savedTeamId }) {
                 
-                // First check if the name has changed
-                if existingTeam.name != team.teamName {
-                    return true
-                }
+                // Compare against the saved team in the database
+                let nameChanged = existingTeam.name != team.teamName
+                let primaryColorChanged = existingTeam.primaryColor.toColor().description != team.primaryColor.description
+                let secondaryColorChanged = existingTeam.secondaryColor.toColor().description != team.secondaryColor.description
+                let fontColorChanged = existingTeam.fontColor.toColor().description != team.fontColor.description
                 
-                // Then check if colors match
-                let primaryColorMatches = existingTeam.primaryColor.toColor().description == team.primaryColor.description
-                let secondaryColorMatches = existingTeam.secondaryColor.toColor().description == team.secondaryColor.description
-                let fontColorMatches = existingTeam.fontColor.toColor().description == team.fontColor.description
-                
-                return !primaryColorMatches || !secondaryColorMatches || !fontColorMatches
+                return nameChanged || primaryColorChanged || secondaryColorChanged || fontColorChanged
             }
             
-            // If we have a saved ID but can't find the team, something is wrong 
-            // (could indicate the team was deleted elsewhere)
+            // If we have a saved ID but can't find the team, something is wrong
             return true
         }
         
         // No saved team ID means this is a new unsaved team, but only if it has a name
-        return !team.teamName.isEmpty
+        return !team.teamName.isEmpty && team.teamName != "New Team"
     }
     
     // Check if this is an existing team being edited (vs a brand new team)

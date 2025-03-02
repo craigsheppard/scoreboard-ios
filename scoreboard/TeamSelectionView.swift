@@ -12,20 +12,42 @@ struct TeamSelectionView: View {
     let gameType: GameType
     let isHomeTeam: Bool
     
-    // Check if the current team has unsaved changes
+    // Check if the current team has unsaved changes - using same logic as in ConfigureTeamComponent
     private func hasUnsavedChanges() -> Bool {
-        // Look for a saved team with matching name
-        let existingTeam = appConfig.getTeams(for: gameType).first { $0.name == team.teamName }
+        // Use the exact same logic that's used in ConfigureTeamComponent for consistency
         
-        if let existingTeam = existingTeam {
-            // Check if properties match
-            return existingTeam.primaryColor.toColor() != team.primaryColor ||
-                   existingTeam.secondaryColor.toColor() != team.secondaryColor ||
-                   existingTeam.fontColor.toColor() != team.fontColor
+        // If we have a lastSavedState record, compare current values to it
+        if let lastSaved = team.lastSavedState {
+            // Check if any property has changed since the last save
+            let nameChanged = lastSaved.name != team.teamName
+            let primaryColorChanged = lastSaved.primaryColor != team.primaryColor.description
+            let secondaryColorChanged = lastSaved.secondaryColor != team.secondaryColor.description
+            let fontColorChanged = lastSaved.fontColor != team.fontColor.description
+            
+            return nameChanged || primaryColorChanged || secondaryColorChanged || fontColorChanged
         }
         
-        // If team name doesn't match any saved team and has a non-empty name, consider it unsaved
-        return !team.teamName.isEmpty
+        // If we have a savedTeamId but no lastSavedState (shouldn't happen normally)
+        if let savedTeamId = team.savedTeamId {
+            // Find the saved team with this ID
+            if let existingTeam = appConfig.getTeams(for: gameType)
+                .first(where: { $0.id == savedTeamId }) {
+                
+                // Compare against the saved team in the database
+                let nameChanged = existingTeam.name != team.teamName
+                let primaryColorChanged = existingTeam.primaryColor.toColor().description != team.primaryColor.description
+                let secondaryColorChanged = existingTeam.secondaryColor.toColor().description != team.secondaryColor.description
+                let fontColorChanged = existingTeam.fontColor.toColor().description != team.fontColor.description
+                
+                return nameChanged || primaryColorChanged || secondaryColorChanged || fontColorChanged
+            }
+            
+            // If we have a saved ID but can't find the team, something is wrong
+            return true
+        }
+        
+        // No saved team ID means this is a new unsaved team, but only if it has a name
+        return !team.teamName.isEmpty && team.teamName != "New Team"
     }
     
     private func applyTeam(_ savedTeam: SavedTeam) {
@@ -51,6 +73,14 @@ struct TeamSelectionView: View {
             team.secondaryColor = savedTeam.secondaryColor.toColor()
             team.fontColor = savedTeam.fontColor.toColor()
             team.savedTeamId = savedTeam.id // Store the link to the saved team
+            
+            // Always update the lastSavedState to the current state when applying a team
+            team.lastSavedState = TeamSavedState(
+                name: savedTeam.name,
+                primaryColor: team.primaryColor.description,
+                secondaryColor: team.secondaryColor.description,
+                fontColor: team.fontColor.description
+            )
             isTeamSelectionPresented = false
         }
     }
@@ -64,11 +94,20 @@ struct TeamSelectionView: View {
                         pendingTeam = nil  // nil indicates "create new team"
                         showingUnsavedChangesAlert = true
                     } else {
-                        // Create a blank new team directly
+                        // Create a blank new team directly - always clear the ID
                         team.teamName = "New Team"
                         team.primaryColor = .red
                         team.secondaryColor = .blue
                         team.fontColor = .white
+                        team.savedTeamId = nil  // Crucial - ensure this is a NEW team
+                        
+                        // Update the lastSavedState to match the new team's initial state
+                        team.lastSavedState = TeamSavedState(
+                            name: "New Team",
+                            primaryColor: team.primaryColor.description,
+                            secondaryColor: team.secondaryColor.description,
+                            fontColor: team.fontColor.description
+                        )
                         isTeamSelectionPresented = false
                     }
                 }) {
@@ -156,6 +195,14 @@ struct TeamSelectionView: View {
                         team.secondaryColor = savedTeam.secondaryColor.toColor()
                         team.fontColor = savedTeam.fontColor.toColor()
                         team.savedTeamId = savedTeam.id
+                        
+                        // Always update the lastSavedState when applying a team
+                        team.lastSavedState = TeamSavedState(
+                            name: savedTeam.name,
+                            primaryColor: team.primaryColor.description,
+                            secondaryColor: team.secondaryColor.description,
+                            fontColor: team.fontColor.description
+                        )
                     } else {
                         // Create new team
                         team.teamName = "New Team"
@@ -163,6 +210,14 @@ struct TeamSelectionView: View {
                         team.secondaryColor = .blue
                         team.fontColor = .white
                         team.savedTeamId = nil
+                        
+                        // Update the lastSavedState to match the new team's initial state
+                        team.lastSavedState = TeamSavedState(
+                            name: "New Team",
+                            primaryColor: team.primaryColor.description,
+                            secondaryColor: team.secondaryColor.description, 
+                            fontColor: team.fontColor.description
+                        )
                     }
                     isTeamSelectionPresented = false
                 }
@@ -175,6 +230,14 @@ struct TeamSelectionView: View {
                         team.secondaryColor = savedTeam.secondaryColor.toColor()
                         team.fontColor = savedTeam.fontColor.toColor()
                         team.savedTeamId = savedTeam.id
+                        
+                        // Always update the lastSavedState when applying a team
+                        team.lastSavedState = TeamSavedState(
+                            name: savedTeam.name,
+                            primaryColor: team.primaryColor.description,
+                            secondaryColor: team.secondaryColor.description,
+                            fontColor: team.fontColor.description
+                        )
                     } else {
                         // Create new team
                         team.teamName = "New Team"
@@ -182,6 +245,14 @@ struct TeamSelectionView: View {
                         team.secondaryColor = .blue
                         team.fontColor = .white
                         team.savedTeamId = nil
+                        
+                        // Update the lastSavedState to match the new team's initial state
+                        team.lastSavedState = TeamSavedState(
+                            name: "New Team",
+                            primaryColor: team.primaryColor.description,
+                            secondaryColor: team.secondaryColor.description,
+                            fontColor: team.fontColor.description
+                        )
                     }
                     isTeamSelectionPresented = false
                 }

@@ -1,6 +1,14 @@
 import SwiftUI
 import Combine
 
+// Struct to track the saved state of a team
+struct TeamSavedState {
+    var name: String
+    var primaryColor: String
+    var secondaryColor: String
+    var fontColor: String
+}
+
 class TeamConfiguration: ObservableObject, Codable {
     @Published var teamName: String
     @Published var primaryColor: Color
@@ -8,6 +16,9 @@ class TeamConfiguration: ObservableObject, Codable {
     @Published var fontColor: Color
     @Published var score: Int
     @Published var savedTeamId: UUID? // Link to the savedTeam this configuration is based on
+    
+    // Not persisted - used to track changes since last save
+    var lastSavedState: TeamSavedState?
 
     // MARK: - Codable Implementation
     enum CodingKeys: CodingKey {
@@ -21,6 +32,14 @@ class TeamConfiguration: ObservableObject, Codable {
         self.fontColor = fontColor
         self.score = score
         self.savedTeamId = savedTeamId
+        
+        // Initialize the last saved state to match current properties
+        self.lastSavedState = TeamSavedState(
+            name: teamName,
+            primaryColor: primaryColor.description,
+            secondaryColor: secondaryColor.description,
+            fontColor: fontColor.description
+        )
     }
 
     required init(from decoder: Decoder) throws {

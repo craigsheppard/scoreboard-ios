@@ -23,6 +23,9 @@ final class AppConfiguration: ObservableObject {
         self.homeTeam = TeamConfiguration(teamName: "Home", primaryColor: .red, secondaryColor: .blue, fontColor: .white)
         self.awayTeam = TeamConfiguration(teamName: "Away", primaryColor: .blue, secondaryColor: .red, fontColor: .white)
         
+        // First load saved teams from UserDefaults before team configs
+        loadTeamsFromLocal()
+        
         // Load current game configuration from UserDefaults
         if let data = UserDefaults.standard.data(forKey: storageKey),
            let savedConfig = try? JSONDecoder().decode(SavedConfiguration.self, from: data) {
@@ -49,14 +52,11 @@ final class AppConfiguration: ObservableObject {
                 self?.iCloudAvailable = available
                 
                 if available {
-                    // Load teams from iCloud
-                    self?.loadTeamsFromCloud()
+                    // Load teams from iCloud and merge with local teams
+                    self?.loadTeamsFromCloud(mergeWithLocal: true)
                     
                     // Subscribe to CloudKit changes
                     self?.subscribeToCloudKitChanges()
-                } else {
-                    // Fall back to local storage
-                    self?.loadTeamsFromLocal()
                 }
             }
         }
@@ -70,20 +70,46 @@ final class AppConfiguration: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 // Reload teams from CloudKit when notified of changes
-                self?.loadTeamsFromCloud()
+                // Always merge with local teams to preserve any local-only changes
+                self?.loadTeamsFromCloud(mergeWithLocal: true)
             }
             .store(in: &cancellables)
     }
     
-    private func loadTeamsFromCloud() {
+    private func loadTeamsFromCloud(mergeWithLocal: Bool = false) {
         CloudKitManager.shared.fetchTeams { [weak self] result in
             DispatchQueue.main.async {
+                guard let self = self else { return }
+                
                 switch result {
-                case .success(let teams):
-                    self?.savedTeams = teams
+                case .success(let cloudTeams):
+                    if mergeWithLocal {
+                        // Combine cloud teams with local teams, preserving any unique teams
+                        // from both sources and using the most recent version for duplicates
+                        var combinedTeams = self.savedTeams
+                        
+                        for cloudTeam in cloudTeams {
+                            if let index = combinedTeams.firstIndex(where: { $0.id == cloudTeam.id }) {
+                                // Team exists in both - use cloud version as it's likely more recent
+                                combinedTeams[index] = cloudTeam
+                            } else {
+                                // Team only in cloud - add it
+                                combinedTeams.append(cloudTeam)
+                            }
+                        }
+                        
+                        self.savedTeams = combinedTeams
+                    } else {
+                        // Just use cloud teams directly
+                        self.savedTeams = cloudTeams
+                    }
+                    
+                    // Always save the merged teams back to local storage
+                    self.saveSavedTeams()
+                    
                 case .failure:
-                    // Fall back to local storage
-                    self?.loadTeamsFromLocal()
+                    // For failures, we already loaded teams from UserDefaults at app start
+                    print("Failed to load from CloudKit, using local teams")
                 }
             }
         }
@@ -142,9 +168,13 @@ final class AppConfiguration: ObservableObject {
             savedTeam.secondaryColor = CodableColor(color: team.secondaryColor)
             savedTeam.fontColor = CodableColor(color: team.fontColor)
             savedTeams[existingIndex] = savedTeam
+            
+            // ID remains the same since we're updating
         } else {
-            // Create a new saved team
-            let savedTeam = SavedTeam(
+            // Always create a new saved team with a new UUID when there's no ID
+            // or if we can't find the team with the existing ID
+            let newSavedTeam = SavedTeam(
+                id: UUID(), // Explicitly create a new UUID
                 name: team.teamName,
                 primaryColor: CodableColor(color: team.primaryColor),
                 secondaryColor: CodableColor(color: team.secondaryColor),
@@ -152,16 +182,26 @@ final class AppConfiguration: ObservableObject {
                 gameType: gameType
             )
             
-            savedTeams.append(savedTeam)
-            // Update the team's saved ID
-            team.savedTeamId = savedTeam.id
+            savedTeams.append(newSavedTeam)
+            // Update the team's saved ID to the new ID
+            team.savedTeamId = newSavedTeam.id
         }
         
         // Save teams in both local storage and cloud
         saveSavedTeams()
         
+        // Important: Mark the last saved state to reflect the current state
+        // This helps detect future unsaved changes correctly
+        team.lastSavedState = TeamSavedState(
+            name: team.teamName,
+            primaryColor: team.primaryColor.description,
+            secondaryColor: team.secondaryColor.description,
+            fontColor: team.fontColor.description
+        )
+        
         // Notify observers that this team has been officially saved
         self.objectWillChange.send()
+        team.objectWillChange.send()
     }
     
     func getTeams(for gameType: GameType) -> [SavedTeam] {
@@ -199,7 +239,7 @@ final class AppConfiguration: ObservableObject {
     
     func refreshTeamsFromCloud() {
         if iCloudAvailable {
-            loadTeamsFromCloud()
+            loadTeamsFromCloud(mergeWithLocal: true)
         }
     }
     
