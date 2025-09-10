@@ -57,78 +57,99 @@ struct ConfigureTeamComponent: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                TextField("Team Name", text: $team.teamName)
-                    .font(.title2)
-                    .padding(8)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .onChange(of: team.teamName) {}
-                
-                Button(action: {
-                    isTeamSelectionPresented = true
-                }) {
-                    Image(systemName: "rectangle.stack.fill")
-                        .foregroundColor(.blue)
+        HStack {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    TextField("Team Name", text: $team.teamName)
+                        .font(.title2)
                         .padding(8)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: team.teamName) {}
+                    
+                    Button(action: {
+                        isTeamSelectionPresented = true
+                    }) {
+                        Image(systemName: "rectangle.stack.fill")
+                            .foregroundColor(.blue)
+                            .padding(8)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
                 }
-                .buttonStyle(BorderlessButtonStyle())
-            }
 
-            HStack {
                 VStack {
-                    Text("Primary Color")
-                    ColorPicker("", selection: $team.primaryColor)
-                        .labelsHidden()
-                        .onChange(of: team.primaryColor) {}
+                    HStack {
+                        VStack {
+                            Text("Main")
+                            ColorPicker("", selection: $team.primaryColor)
+                                .labelsHidden()
+                                .onChange(of: team.primaryColor) {}
+                        }
+                        VStack {
+                            Text("Accent")
+                            ColorPicker("", selection: $team.secondaryColor)
+                                .labelsHidden()
+                                .onChange(of: team.secondaryColor) {}
+                        }
+                        VStack {
+                            Text("Font")
+                            ColorPicker("", selection: $team.fontColor)
+                                .labelsHidden()
+                                .onChange(of: team.fontColor) {}
+                        }
+                    }
                 }
-                VStack {
-                    Text("Secondary Color")
-                    ColorPicker("", selection: $team.secondaryColor)
-                        .labelsHidden()
-                        .onChange(of: team.secondaryColor) {}
-                }
-                VStack {
-                    Text("Font Color")
-                    ColorPicker("", selection: $team.fontColor)
-                        .labelsHidden()
-                        .onChange(of: team.fontColor) {}
+                .padding()
+                .background(Color(UIColor.systemGray5))
+                .cornerRadius(8)
+                
+                if hasUnsavedChanges {
+                    Button(action: {
+                        showingSaveTeamAlert = true
+                    }) {
+                        HStack {
+                            Spacer()
+                            Text(isExistingTeam ? "Save Changes" : "Save Team")
+                                .font(.footnote)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                            Spacer()
+                        }
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                    .alert(isPresented: $showingSaveTeamAlert) {
+                        Alert(
+                            title: Text(isExistingTeam ? "Save Changes" : "Save Team"),
+                            message: Text(isExistingTeam ?
+                                         "Save changes to '\(team.teamName)'?" :
+                                         "Save '\(team.teamName)' as a \(appConfig.currentGameType.rawValue) team?"),
+                            primaryButton: .default(Text("Save")) {
+                                appConfig.saveTeam(team: team, for: appConfig.currentGameType)
+                            },
+                            secondaryButton: .cancel()
+                        )
+                    }
                 }
             }
             
-            if hasUnsavedChanges {
-                Button(action: {
-                    showingSaveTeamAlert = true
-                }) {
-                    HStack {
-                        Spacer()
-                        Text(isExistingTeam ? "Save Changes" : "Save Team")
-                            .font(.footnote)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                        Spacer()
-                    }
+            Spacer()
+            
+            Text(isHomeTeam ? "Home" : "Away")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.secondary)
+                .padding(.vertical, 24)
+                .padding(.horizontal, -10)
+                .rotationEffect(.degrees(-90))
+                .onTapGesture {
+                    appConfig.swapHomeAway()
                 }
-                .buttonStyle(BorderlessButtonStyle())
-                .alert(isPresented: $showingSaveTeamAlert) {
-                    Alert(
-                        title: Text(isExistingTeam ? "Save Changes" : "Save Team"),
-                        message: Text(isExistingTeam ?
-                                     "Save changes to '\(team.teamName)'?" :
-                                     "Save '\(team.teamName)' as a \(appConfig.currentGameType.rawValue) team?"),
-                        primaryButton: .default(Text("Save")) {
-                            appConfig.saveTeam(team: team, for: appConfig.currentGameType)
-                        },
-                        secondaryButton: .cancel()
-                    )
-                }
-            }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary, lineWidth: 1))
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(10)
         .padding()
         .sheet(isPresented: $isTeamSelectionPresented) {
             TeamSelectionView(

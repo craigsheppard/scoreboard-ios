@@ -5,6 +5,7 @@ final class AppConfiguration: ObservableObject {
     @Published var homeTeam: TeamConfiguration
     @Published var awayTeam: TeamConfiguration
     @Published var currentGameType: GameType = .hockey
+    @Published var isHomeTeamA: Bool = true
     @Published var savedTeams: [SavedTeam] = []
     @Published var iCloudAvailable: Bool = false
     
@@ -246,5 +247,12 @@ final class AppConfiguration: ObservableObject {
     func newGame() {
         homeTeam.score = 0
         awayTeam.score = 0
+    }
+
+    func swapHomeAway() {
+        isHomeTeamA.toggle()
+        let tempTeam = homeTeam
+        homeTeam = awayTeam
+        awayTeam = tempTeam
     }
 }

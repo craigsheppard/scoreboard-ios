@@ -35,37 +35,12 @@ struct ConfigureView: View {
             
             // Two team configuration components stacked vertically
             VStack(spacing: 16) {
-                ConfigureTeamComponent(team: appConfig.homeTeam, isHomeTeam: true)
-                ConfigureTeamComponent(team: appConfig.awayTeam, isHomeTeam: false)
+                ConfigureTeamComponent(team: appConfig.homeTeam, isHomeTeam: appConfig.isHomeTeamA)
+                ConfigureTeamComponent(team: appConfig.awayTeam, isHomeTeam: !appConfig.isHomeTeamA)
             }
             .padding(.top, 10)
             
             Spacer()
-            
-            // New Game button (replacing Reset Score)
-            Button(action: {
-                showingNewGameAlert = true
-            }) {
-                Text("New Game")
-                    .font(.headline)
-                    .padding(8)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.7))
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .padding(.horizontal)
-            .alert(isPresented: $showingNewGameAlert) {
-                Alert(
-                    title: Text("New Game"),
-                    message: Text("Start a new game? This will reset the score."),
-                    primaryButton: .default(Text("New Game")) {
-                        // Reset scores for both teams
-                        appConfig.newGame()
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
             
             // "Go" button to force landscape
             Button(action: {
@@ -76,7 +51,7 @@ struct ConfigureView: View {
                     }
                 }
             }) {
-                Text("Go")
+                Text("Scoreboard")
                     .font(.largeTitle)
                     .padding()
                     .frame(maxWidth: .infinity)
