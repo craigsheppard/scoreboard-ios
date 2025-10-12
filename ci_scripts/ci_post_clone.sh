@@ -17,10 +17,12 @@ if [ -n "$CI_TAG" ]; then
 
   echo "Setting version from tag: $TAG_NAME"
 
-  # Update CFBundleShortVersionString (user-facing version)
+  # Add or update CFBundleShortVersionString (user-facing version)
+  /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $TAG_NAME" "$PLIST_PATH" 2>/dev/null || \
   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $TAG_NAME" "$PLIST_PATH"
 
-  # Update CFBundleVersion (build number) with Xcode Cloud build number
+  # Add or update CFBundleVersion (build number) with Xcode Cloud build number
+  /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $CI_BUILD_NUMBER" "$PLIST_PATH" 2>/dev/null || \
   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $CI_BUILD_NUMBER" "$PLIST_PATH"
 
   echo "✓ Updated Info.plist:"
