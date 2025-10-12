@@ -1,1 +1,11 @@
+# macOS
 .DS_Store
+
+# Xcode user data
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
