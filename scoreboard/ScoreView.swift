@@ -304,14 +304,16 @@ struct ScoreView: View {
             twoPointHit = true
             // If initial point wasn't scored yet, add it too
             let pointsToAdd = initialPointScored ? 1 : 2
-            // ALWAYS 2 haptics for 2pt target
-            increaseScore(by: pointsToAdd, hapticCount: 2)
+            // Haptic count matches points being added RIGHT NOW
+            // This ensures total haptics = total points (2 haptics for 2 points)
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
         case .threePoint:
             threePointHit = true
             // If initial point wasn't scored yet, add it too
             let pointsToAdd = initialPointScored ? 2 : 3
-            // ALWAYS 3 haptics for 3pt target
-            increaseScore(by: pointsToAdd, hapticCount: 3)
+            // Haptic count matches points being added RIGHT NOW
+            // This ensures total haptics = total points (3 haptics for 3 points)
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
         }
 
         initialPointScored = true  // Mark as scored even if we skipped the threshold
