@@ -125,16 +125,17 @@ struct ScoreView: View {
                 startTargetPulseAnimation()
             }
 
+            // Check for target hits FIRST (before initial point) - targets take priority
+            if basketballState == .waitingForTarget && showTargets {
+                checkTargetHits(at: value.location, in: geometry.size)
+            }
+
             // Check if initial threshold crossed for first point (only once!)
+            // This only happens if we didn't hit a target already
             if value.translation.height < -swipeThreshold && basketballState == .waitingForTarget && !initialPointScored {
                 increaseScore(by: 1, hapticCount: 1)
                 initialPointScored = true
                 // Keep targets visible for continued gesture
-            }
-
-            // Check for target hits while dragging
-            if basketballState == .waitingForTarget && showTargets {
-                checkTargetHits(at: value.location, in: geometry.size)
             }
 
             // Handle swipe down
