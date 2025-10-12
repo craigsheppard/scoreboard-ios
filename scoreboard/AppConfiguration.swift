@@ -247,4 +247,10 @@ final class AppConfiguration: ObservableObject {
         homeTeam.score = 0
         awayTeam.score = 0
     }
+
+    func swapTeams() {
+        let temp = homeTeam
+        homeTeam = awayTeam
+        awayTeam = temp
+    }
 }

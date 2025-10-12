@@ -36,6 +36,24 @@ struct ConfigureView: View {
             // Two team configuration components stacked vertically
             VStack(spacing: 16) {
                 ConfigureTeamComponent(team: appConfig.homeTeam, isHomeTeam: true)
+
+                // Swap teams button
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        appConfig.swapTeams()
+                    }
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.headline)
+                        Text("Swap Sides")
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(.blue)
+                    .padding(.vertical, 4)
+                }
+                .buttonStyle(BorderlessButtonStyle())
+
                 ConfigureTeamComponent(team: appConfig.awayTeam, isHomeTeam: false)
             }
             .padding(.top, 10)
