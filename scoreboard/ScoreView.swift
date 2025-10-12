@@ -249,7 +249,7 @@ struct ScoreView: View {
     private func twoPointPosition(in size: CGSize) -> CGPoint {
         CGPoint(
             x: size.width / 2,
-            y: size.height * 0.2  // 20% from top
+            y: size.height * 0.15  // Same row as 3pt target
         )
     }
 
@@ -304,12 +304,14 @@ struct ScoreView: View {
             twoPointHit = true
             // If initial point wasn't scored yet, add it too
             let pointsToAdd = initialPointScored ? 1 : 2
-            increaseScore(by: pointsToAdd, hapticCount: 2)  // Total +2
+            // Haptic count matches points added (2 total for 2pt target)
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
         case .threePoint:
             threePointHit = true
             // If initial point wasn't scored yet, add it too
             let pointsToAdd = initialPointScored ? 2 : 3
-            increaseScore(by: pointsToAdd, hapticCount: 3)  // Total +3
+            // Haptic count matches points added (3 total for 3pt target)
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
         }
 
         initialPointScored = true  // Mark as scored even if we skipped the threshold
