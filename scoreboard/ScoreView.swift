@@ -302,12 +302,17 @@ struct ScoreView: View {
         switch targetType {
         case .twoPoint:
             twoPointHit = true
-            increaseScore(by: 1, hapticCount: 2)  // +1 more point (total +2)
+            // If initial point wasn't scored yet, add it too
+            let pointsToAdd = initialPointScored ? 1 : 2
+            increaseScore(by: pointsToAdd, hapticCount: 2)  // Total +2
         case .threePoint:
             threePointHit = true
-            increaseScore(by: 2, hapticCount: 3)  // +2 more points (total +3)
+            // If initial point wasn't scored yet, add it too
+            let pointsToAdd = initialPointScored ? 2 : 3
+            increaseScore(by: pointsToAdd, hapticCount: 3)  // Total +3
         }
 
+        initialPointScored = true  // Mark as scored even if we skipped the threshold
         swipeCompleted = true
     }
 
