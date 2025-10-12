@@ -12,20 +12,20 @@ if [ -n "$CI_TAG" ]; then
   # Strip off the leading "v" from the tag name
   TAG_NAME=${TAG_NAME#v}
 
-  # Define the path to Info.plist file
-  PLIST_PATH="${CI_PRIMARY_REPOSITORY_PATH}/scoreboard/Info.plist"
+  # Define the path to project.pbxproj file
+  PROJECT_FILE="${CI_PRIMARY_REPOSITORY_PATH}/Scoreboard ∞.xcodeproj/project.pbxproj"
 
   echo "Setting version from tag: $TAG_NAME"
 
-  # Update CFBundleShortVersionString (user-facing version)
-  /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $TAG_NAME" "$PLIST_PATH"
+  # Update MARKETING_VERSION (user-facing version)
+  sed -i '' "s/MARKETING_VERSION = [^;]*/MARKETING_VERSION = $TAG_NAME/" "$PROJECT_FILE"
 
-  # Update CFBundleVersion (build number) with Xcode Cloud build number
-  /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $CI_BUILD_NUMBER" "$PLIST_PATH"
+  # Update CURRENT_PROJECT_VERSION (build number) with Xcode Cloud build number
+  sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*/CURRENT_PROJECT_VERSION = $CI_BUILD_NUMBER/" "$PROJECT_FILE"
 
-  echo "✓ Updated Info.plist:"
-  echo "  Version: $TAG_NAME"
-  echo "  Build: $CI_BUILD_NUMBER"
+  echo "✓ Updated project.pbxproj:"
+  echo "  MARKETING_VERSION: $TAG_NAME"
+  echo "  CURRENT_PROJECT_VERSION: $CI_BUILD_NUMBER"
 else
   echo "No CI_TAG found, skipping version update"
 fi
