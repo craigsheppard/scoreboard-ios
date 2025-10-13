@@ -103,9 +103,20 @@ struct TeamSelectionViewRedesigned: View {
                 }
             }
             .navigationBarTitle(isHomeTeam ? "Select Home Team" : "Select Away Team", displayMode: .inline)
-            .navigationBarItems(trailing: Button("Done") {
-                isTeamSelectionPresented = false
-            })
+            .navigationBarItems(
+                leading: Button(action: {
+                    appConfig.toggleTeamSelectionStyle()
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "list.bullet")
+                        Text("Classic")
+                    }
+                    .font(.caption)
+                },
+                trailing: Button("Done") {
+                    isTeamSelectionPresented = false
+                }
+            )
             .alert(isPresented: $showingDeleteAlert) {
                 Alert(
                     title: Text("Delete Team"),
