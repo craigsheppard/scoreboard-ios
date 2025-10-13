@@ -137,7 +137,6 @@ struct ScoreView: View {
             // Check if initial threshold crossed for first point (only once!)
             // This only happens if we didn't hit a target already
             if value.translation.height < -swipeThreshold && basketballState == .waitingForTarget && !initialPointScored {
-                print("🏀 Initial +1: scoring 1 point with 1 haptic")
                 increaseScore(by: 1)
                 initialPointScored = true
                 // Keep targets visible for continued gesture
@@ -312,7 +311,6 @@ struct ScoreView: View {
             // If initial +1 already scored: add 1 more (total 2)
             // If hitting directly: add all 2 points
             let pointsToAdd = initialPointScored ? 1 : 2
-            print("🏀 2PT: initialPointScored=\(initialPointScored), adding \(pointsToAdd) points with \(pointsToAdd) haptics")
             increaseScore(by: pointsToAdd)
 
         case .threePoint:
@@ -320,7 +318,6 @@ struct ScoreView: View {
             // If initial +1 already scored: add 2 more (total 3)
             // If hitting directly: add all 3 points
             let pointsToAdd = initialPointScored ? 2 : 3
-            print("🏀 3PT: initialPointScored=\(initialPointScored), adding \(pointsToAdd) points with \(pointsToAdd) haptics")
             increaseScore(by: pointsToAdd)
         }
 
@@ -362,14 +359,11 @@ struct ScoreView: View {
     private func triggerMultipleHaptics(count: Int) {
         guard count > 0 else { return }
 
-        print("🔨 Triggering \(count) haptic(s)")
-
-        let hapticSpacing = 0.2
+        let hapticSpacing = 0.15
         let timeSinceLastHaptic = Date().timeIntervalSince(lastHapticTime)
 
         // Calculate initial delay to maintain even spacing from last haptic
         let initialDelay = max(0, hapticSpacing - timeSinceLastHaptic)
-        print("  ⏱️ Time since last: \(timeSinceLastHaptic)s, initial delay: \(initialDelay)s")
 
         // Schedule each haptic with proper spacing
         for i in 0..<count {
