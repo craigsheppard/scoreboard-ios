@@ -1,13 +1,18 @@
 import SwiftUI
 
-// Basketball scoring state
+/// Basketball scoring state machine
+/// - inactive: No basketball gesture in progress
+/// - waitingForTarget: Gesture started, targets visible, waiting for hit
+/// - targetHit: Target has been hit, completing the gesture
 enum BasketballScoringState: Equatable {
     case inactive
     case waitingForTarget
     case targetHit
 }
 
-// Target type for basketball scoring
+/// Basketball scoring target types
+/// - twoPoint: Center target, awards 2 total points
+/// - threePoint: Corner target (side-aware), awards 3 total points
 enum TargetType {
     case twoPoint
     case threePoint
@@ -356,10 +361,14 @@ struct ScoreView: View {
         generator.impactOccurred()
     }
 
+    /// Triggers multiple haptic feedbacks with consistent spacing
+    /// - Parameter count: Number of haptics to trigger
+    /// - Note: Maintains 0.15s spacing between haptics across the entire gesture,
+    ///         even when chaining multiple calls (e.g., initial +1 followed by target hit)
     private func triggerMultipleHaptics(count: Int) {
         guard count > 0 else { return }
 
-        let hapticSpacing = 0.15
+        let hapticSpacing = 0.15  // Time between each haptic tap
         let timeSinceLastHaptic = Date().timeIntervalSince(lastHapticTime)
 
         // Calculate initial delay to maintain even spacing from last haptic
