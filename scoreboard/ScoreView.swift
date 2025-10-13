@@ -355,7 +355,13 @@ struct ScoreView: View {
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.prepare()
 
-        for i in 0..<count {
+        // Fire first haptic immediately
+        if count > 0 {
+            generator.impactOccurred(intensity: 1.0)
+        }
+
+        // Fire remaining haptics with delays
+        for i in 1..<count {
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.08) {
                 generator.impactOccurred(intensity: 1.0)
             }
