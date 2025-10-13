@@ -352,18 +352,17 @@ struct ScoreView: View {
     }
 
     private func triggerMultipleHaptics(count: Int) {
-        let generator = UIImpactFeedbackGenerator(style: .heavy)
-        generator.prepare()
+        guard count > 0 else { return }
 
         // Fire first haptic immediately
-        if count > 0 {
-            generator.impactOccurred(intensity: 1.0)
-        }
+        let generator = UIImpactFeedbackGenerator(style: .heavy)
+        generator.prepare()
+        generator.impactOccurred()
 
-        // Fire remaining haptics with delays
-        for i in 1..<count {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.08) {
-                generator.impactOccurred(intensity: 1.0)
+        // Recursively fire remaining haptics
+        if count > 1 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.triggerMultipleHaptics(count: count - 1)
             }
         }
     }
