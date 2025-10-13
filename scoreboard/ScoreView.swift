@@ -366,8 +366,8 @@ struct ScoreView: View {
 
         // Recursively fire remaining haptics
         if count > 1 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.triggerMultipleHaptics(count: count - 1)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.triggerMultipleHaptics(count: count - 1)
             }
         }
     }
