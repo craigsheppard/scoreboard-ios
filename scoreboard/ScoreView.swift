@@ -369,6 +369,7 @@ struct ScoreView: View {
 
         // Calculate initial delay to maintain even spacing from last haptic
         let initialDelay = max(0, hapticSpacing - timeSinceLastHaptic)
+        print("  ⏱️ Time since last: \(timeSinceLastHaptic)s, initial delay: \(initialDelay)s")
 
         // Schedule each haptic with proper spacing
         for i in 0..<count {
