@@ -133,7 +133,7 @@ struct ScoreView: View {
             // Check if initial threshold crossed for first point (only once!)
             // This only happens if we didn't hit a target already
             if value.translation.height < -swipeThreshold && basketballState == .waitingForTarget && !initialPointScored {
-                increaseScore(by: 1, hapticCount: 1)
+                increaseScore(by: 1)
                 initialPointScored = true
                 // Keep targets visible for continued gesture
             }
@@ -306,14 +306,14 @@ struct ScoreView: View {
             // If initial +1 already scored: add 1 more (total 2)
             // If hitting directly: add all 2 points
             let pointsToAdd = initialPointScored ? 1 : 2
-            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
+            increaseScore(by: pointsToAdd)
 
         case .threePoint:
             threePointHit = true
             // If initial +1 already scored: add 2 more (total 3)
             // If hitting directly: add all 3 points
             let pointsToAdd = initialPointScored ? 2 : 3
-            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
+            increaseScore(by: pointsToAdd)
         }
 
         initialPointScored = true  // Mark as scored even if we skipped the threshold
@@ -330,9 +330,9 @@ struct ScoreView: View {
 
     // MARK: - Score Management
 
-    private func increaseScore(by points: Int, hapticCount: Int = 1) {
+    private func increaseScore(by points: Int) {
         team.score += points
-        triggerMultipleHaptics(count: hapticCount)
+        triggerMultipleHaptics(count: points)
         triggerFlash()
     }
 
