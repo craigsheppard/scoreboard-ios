@@ -32,6 +32,9 @@ struct ScoreView: View {
     @State private var initialPointScored: Bool = false
     @State private var targetPulse: CGFloat = 1.0
 
+    // Haptic generator stored as property to prevent deallocation
+    private let impactGenerator = UIImpactFeedbackGenerator(style: .heavy)
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -359,15 +362,23 @@ struct ScoreView: View {
 
         print("🔨 Triggering \(count) haptic(s)")
 
-        // Schedule all haptics upfront to avoid interruption
-        for i in 0..<count {
-            let delay = Double(i) * 0.1
+        // Prepare the generator once
+        impactGenerator.prepare()
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                let generator = UIImpactFeedbackGenerator(style: .heavy)
-                generator.prepare()
-                generator.impactOccurred()
-                print("  💥 Haptic \(i + 1) of \(count) fired")
+        // Schedule all haptics with increased delay for better distinction
+        for i in 0..<count {
+            let delay = Double(i) * 0.15  // Increased from 0.1 to 0.15
+
+            if i == 0 {
+                // Fire first one immediately
+                impactGenerator.impactOccurred(intensity: 1.0)
+                print("  💥 Haptic 1 of \(count) fired immediately")
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [impactGenerator] in
+                    impactGenerator.prepare()  // Re-prepare for each subsequent haptic
+                    impactGenerator.impactOccurred(intensity: 1.0)
+                    print("  💥 Haptic \(i + 1) of \(count) fired at +\(delay)s")
+                }
             }
         }
     }
