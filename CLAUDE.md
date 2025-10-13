@@ -78,6 +78,13 @@ The app switches views based on device orientation (ContentView.swift:8-16):
 - **Color Handling**: Use CodableColor for persistence of SwiftUI Color
 - **Comments**: Document public APIs and complex logic
 
+## Git Workflow
+- **NEVER push directly to main branch** - Always use feature branches and pull requests
+- **Branch naming**: Use descriptive names like `feature/add-scoring`, `bugfix/haptic-timing`
+- **Commit messages**: Use clear, descriptive messages explaining what changed and why
+- **Pull requests**: Create PRs for all changes, even small ones, to maintain code review process
+- **Feature branches**: Create from main, merge back via PR after review
+
 ## Key Patterns
 - **Reactive auto-save**: Combine publishers trigger saves when team properties change (AppConfiguration.swift:125-133)
 - **iCloud availability check**: App checks CloudKit availability at launch and enables sync conditionally
