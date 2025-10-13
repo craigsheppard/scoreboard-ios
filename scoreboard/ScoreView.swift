@@ -31,6 +31,7 @@ struct ScoreView: View {
     @State private var currentGestureLocation: CGPoint = .zero
     @State private var initialPointScored: Bool = false
     @State private var targetPulse: CGFloat = 1.0
+    @State private var lastHapticTime: Date = Date()
 
     // Haptic generator stored as property to prevent deallocation
     private let impactGenerator = UIImpactFeedbackGenerator(style: .heavy)
@@ -172,6 +173,7 @@ struct ScoreView: View {
         threePointHit = false
         initialPointScored = false
         targetPulse = 1.0
+        lastHapticTime = Date()  // Reset haptic timing for next gesture
     }
 
     // MARK: - Basketball Target Rendering
@@ -362,12 +364,23 @@ struct ScoreView: View {
 
         print("🔨 Triggering \(count) haptic(s)")
 
-        // Simple approach: schedule each haptic with more distinct spacing
+        let hapticSpacing = 0.2
+        let timeSinceLastHaptic = Date().timeIntervalSince(lastHapticTime)
+
+        // Calculate initial delay to maintain even spacing from last haptic
+        let initialDelay = max(0, hapticSpacing - timeSinceLastHaptic)
+
+        // Schedule each haptic with proper spacing
         for i in 0..<count {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) { [impactGenerator] in
+            let delay = initialDelay + Double(i) * hapticSpacing
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [impactGenerator] in
                 impactGenerator.impactOccurred(intensity: 1.0)
             }
         }
+
+        // Update lastHapticTime to when the last haptic will fire
+        lastHapticTime = Date().addingTimeInterval(initialDelay + Double(count - 1) * hapticSpacing)
     }
 
     private func showInvalidActionFeedback() {
