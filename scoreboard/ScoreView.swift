@@ -362,9 +362,9 @@ struct ScoreView: View {
 
         print("🔨 Triggering \(count) haptic(s)")
 
-        // Simple approach: schedule each haptic with minimal delay
+        // Simple approach: schedule each haptic with more distinct spacing
         for i in 0..<count {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.08) { [impactGenerator] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.2) { [impactGenerator] in
                 impactGenerator.impactOccurred(intensity: 1.0)
             }
         }
