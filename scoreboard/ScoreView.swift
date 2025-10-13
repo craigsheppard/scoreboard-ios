@@ -300,23 +300,20 @@ struct ScoreView: View {
     private func handleTargetHit(_ targetType: TargetType) {
         basketballState = .targetHit
 
-        // Calculate points already scored in this gesture
-        let pointsAlreadyScored = initialPointScored ? 1 : 0
-
         switch targetType {
         case .twoPoint:
             twoPointHit = true
-            // Ensure TOTAL points = 2 and TOTAL haptics = 2 for entire gesture
-            let pointsToAdd = 2 - pointsAlreadyScored  // Will be 2 if direct, 1 if after +1
-            let hapticsToAdd = 2 - pointsAlreadyScored // Will be 2 if direct, 1 if after +1
-            increaseScore(by: pointsToAdd, hapticCount: hapticsToAdd)
+            // If initial +1 already scored: add 1 more (total 2)
+            // If hitting directly: add all 2 points
+            let pointsToAdd = initialPointScored ? 1 : 2
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
 
         case .threePoint:
             threePointHit = true
-            // Ensure TOTAL points = 3 and TOTAL haptics = 3 for entire gesture
-            let pointsToAdd = 3 - pointsAlreadyScored  // Will be 3 if direct, 2 if after +1
-            let hapticsToAdd = 3 - pointsAlreadyScored // Will be 3 if direct, 2 if after +1
-            increaseScore(by: pointsToAdd, hapticCount: hapticsToAdd)
+            // If initial +1 already scored: add 2 more (total 3)
+            // If hitting directly: add all 3 points
+            let pointsToAdd = initialPointScored ? 2 : 3
+            increaseScore(by: pointsToAdd, hapticCount: pointsToAdd)
         }
 
         initialPointScored = true  // Mark as scored even if we skipped the threshold
