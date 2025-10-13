@@ -362,23 +362,10 @@ struct ScoreView: View {
 
         print("🔨 Triggering \(count) haptic(s)")
 
-        // Prepare the generator once
-        impactGenerator.prepare()
-
-        // Schedule all haptics with increased delay for better distinction
+        // Simple approach: schedule each haptic with minimal delay
         for i in 0..<count {
-            let delay = Double(i) * 0.15  // Increased from 0.1 to 0.15
-
-            if i == 0 {
-                // Fire first one immediately
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.08) { [impactGenerator] in
                 impactGenerator.impactOccurred(intensity: 1.0)
-                print("  💥 Haptic 1 of \(count) fired immediately")
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [impactGenerator] in
-                    impactGenerator.prepare()  // Re-prepare for each subsequent haptic
-                    impactGenerator.impactOccurred(intensity: 1.0)
-                    print("  💥 Haptic \(i + 1) of \(count) fired at +\(delay)s")
-                }
             }
         }
     }
