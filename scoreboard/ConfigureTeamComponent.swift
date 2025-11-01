@@ -131,13 +131,23 @@ struct ConfigureTeamComponent: View {
         .background(RoundedRectangle(cornerRadius: 10).stroke(Color.secondary, lineWidth: 1))
         .padding()
         .sheet(isPresented: $isTeamSelectionPresented) {
-            TeamSelectionView(
-                team: team,
-                isTeamSelectionPresented: $isTeamSelectionPresented,
-                gameType: appConfig.currentGameType,
-                isHomeTeam: isHomeTeam
-            )
-            .environmentObject(appConfig)
+            if appConfig.useModernTeamSelection {
+                TeamSelectionViewRedesigned(
+                    team: team,
+                    isTeamSelectionPresented: $isTeamSelectionPresented,
+                    gameType: appConfig.currentGameType,
+                    isHomeTeam: isHomeTeam
+                )
+                .environmentObject(appConfig)
+            } else {
+                TeamSelectionView(
+                    team: team,
+                    isTeamSelectionPresented: $isTeamSelectionPresented,
+                    gameType: appConfig.currentGameType,
+                    isHomeTeam: isHomeTeam
+                )
+                .environmentObject(appConfig)
+            }
         }
     }
 }
