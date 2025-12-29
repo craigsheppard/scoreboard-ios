@@ -33,7 +33,6 @@ struct ScoreView: View {
     private let fontSize: CGFloat = 175
     private var touchZoneGrace: CGFloat { fontSize * 0.5 }
     @State private var hasEnteredTouchZone: Bool = false
-    @State private var gestureStartLocation: CGPoint = .zero
 
     // Basketball-specific state
     @State private var basketballState: BasketballScoringState = .inactive
@@ -57,7 +56,7 @@ struct ScoreView: View {
                 OutlinedText(
                     text: "\(team.score)",
                     fontName: "JerseyM54",
-                    fontSize: 175,
+                    fontSize: fontSize,
                     textColor: UIColor(team.fontColor),
                     strokeColor: UIColor(team.secondaryColor),
                     strokeWidth: -5.0,
@@ -76,11 +75,6 @@ struct ScoreView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        // Track start location on first change
-                        if gestureStartLocation == .zero {
-                            gestureStartLocation = value.startLocation
-                        }
-
                         // Check if finger has entered the touch zone
                         if !hasEnteredTouchZone && isInTouchZone(value.location, in: geometry.size) {
                             hasEnteredTouchZone = true
@@ -93,17 +87,15 @@ struct ScoreView: View {
                         let isTap = abs(value.translation.width) < 10 && abs(value.translation.height) < 10
 
                         if isTap {
-                            // Taps must start within the touch zone
-                            if isInTouchZone(value.startLocation, in: geometry.size) {
+                            // In non-basketball modes, allow tap to directly increase the score.
+                            // In basketball mode, scoring must go through the 2- and 3-point targets,
+                            // so taps should not award points directly.
+                            if !isBasketballMode && isInTouchZone(value.startLocation, in: geometry.size) {
                                 increaseScore(by: 1)
                             }
                         }
 
                         handleDragEnded()
-
-                        // Reset touch zone tracking
-                        gestureStartLocation = .zero
-                        hasEnteredTouchZone = false
                     }
             )
         }
@@ -238,6 +230,9 @@ struct ScoreView: View {
         initialPointScored = false
         targetPulse = 1.0
         lastHapticTime = Date()  // Reset haptic timing for next gesture
+
+        // Reset touch zone tracking
+        hasEnteredTouchZone = false
     }
 
     // MARK: - Basketball Target Rendering
