@@ -28,6 +28,12 @@ struct ScoreView: View {
     @State private var flashColor: Color? = nil
     private let swipeThreshold: CGFloat = 123
 
+    // Touch zone configuration
+    // Grace area extends 50% of font height around the score number
+    private let fontSize: CGFloat = 175
+    private var touchZoneGrace: CGFloat { fontSize * 0.5 }
+    @State private var hasEnteredTouchZone: Bool = false
+
     // Basketball-specific state
     @State private var basketballState: BasketballScoringState = .inactive
     @State private var showTargets: Bool = false
@@ -50,7 +56,7 @@ struct ScoreView: View {
                 OutlinedText(
                     text: "\(team.score)",
                     fontName: "JerseyM54",
-                    fontSize: 175,
+                    fontSize: fontSize,
                     textColor: UIColor(team.fontColor),
                     strokeColor: UIColor(team.secondaryColor),
                     strokeWidth: -5.0,
@@ -66,15 +72,29 @@ struct ScoreView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onTapGesture {
-                increaseScore(by: 1)
-            }
-            .simultaneousGesture(
-                DragGesture()
+            .gesture(
+                DragGesture(minimumDistance: 0)
                     .onChanged { value in
+                        // Check if finger has entered the touch zone
+                        if !hasEnteredTouchZone && isInTouchZone(value.location, in: geometry.size) {
+                            hasEnteredTouchZone = true
+                        }
+
                         handleDragChanged(value, in: geometry)
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
+                        // Check if this was a tap (very short movement)
+                        let isTap = abs(value.translation.width) < 10 && abs(value.translation.height) < 10
+
+                        if isTap {
+                            // In non-basketball modes, allow tap to directly increase the score.
+                            // In basketball mode, scoring must go through the 2- and 3-point targets,
+                            // so taps should not award points directly.
+                            if !isBasketballMode && isInTouchZone(value.startLocation, in: geometry.size) {
+                                increaseScore(by: 1)
+                            }
+                        }
+
                         handleDragEnded()
                     }
             )
@@ -85,6 +105,36 @@ struct ScoreView: View {
 
     private var isBasketballMode: Bool {
         appConfig.currentGameType == .basketball
+    }
+
+    // MARK: - Touch Zone Detection
+
+    /// Calculates the valid touch zone around the score number
+    /// The zone is centered on the score text and extends by the grace amount on all sides
+    private func calculateTouchZone(in size: CGSize) -> CGRect {
+        let centerX = size.width / 2
+        let centerY = size.height / 2
+
+        // Estimate score width based on digit count
+        // Jersey fonts are typically 55-60% as wide as tall per character
+        let digitCount = max(1, String(team.score).count)
+        let estimatedDigitWidth = fontSize * 0.58
+        let scoreWidth = CGFloat(digitCount) * estimatedDigitWidth
+
+        let halfWidth = scoreWidth / 2 + touchZoneGrace
+        let halfHeight = fontSize / 2 + touchZoneGrace
+
+        return CGRect(
+            x: centerX - halfWidth,
+            y: centerY - halfHeight,
+            width: halfWidth * 2,
+            height: halfHeight * 2
+        )
+    }
+
+    /// Checks if a point is within the valid touch zone
+    private func isInTouchZone(_ location: CGPoint, in size: CGSize) -> Bool {
+        calculateTouchZone(in: size).contains(location)
     }
 
     // MARK: - Gesture Handling
@@ -106,11 +156,12 @@ struct ScoreView: View {
         if abs(value.translation.width) < 70 {
             dragOffset = value.translation.height * 0.33
 
-            if value.translation.height < -swipeThreshold {
+            // Only award points if finger has passed through the touch zone
+            if value.translation.height < -swipeThreshold && hasEnteredTouchZone {
                 increaseScore(by: 1)
                 swipeCompleted = true
                 resetDrag()
-            } else if value.translation.height > swipeThreshold {
+            } else if value.translation.height > swipeThreshold && hasEnteredTouchZone {
                 if team.score > 0 {
                     decreaseScore()
                 } else {
@@ -139,16 +190,17 @@ struct ScoreView: View {
                 checkTargetHits(at: value.location, in: geometry.size)
             }
 
-            // Check if initial threshold crossed for first point (only once!)
+            // Award initial +1 point when finger enters the touch zone (only once!)
             // This only happens if we didn't hit a target already
-            if value.translation.height < -swipeThreshold && basketballState == .waitingForTarget && !initialPointScored {
+            // Haptic is synced with point award via increaseScore
+            if hasEnteredTouchZone && basketballState == .waitingForTarget && !initialPointScored {
                 increaseScore(by: 1)
                 initialPointScored = true
                 // Keep targets visible for continued gesture
             }
 
-            // Handle swipe down
-            if value.translation.height > swipeThreshold && basketballState == .inactive {
+            // Handle swipe down (must have entered touch zone)
+            if value.translation.height > swipeThreshold && basketballState == .inactive && hasEnteredTouchZone {
                 if team.score > 0 {
                     decreaseScore()
                 } else {
@@ -178,6 +230,9 @@ struct ScoreView: View {
         initialPointScored = false
         targetPulse = 1.0
         lastHapticTime = Date()  // Reset haptic timing for next gesture
+
+        // Reset touch zone tracking
+        hasEnteredTouchZone = false
     }
 
     // MARK: - Basketball Target Rendering
