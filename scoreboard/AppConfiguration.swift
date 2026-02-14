@@ -7,6 +7,7 @@ final class AppConfiguration: ObservableObject {
     @Published var currentGameType: GameType = .hockey
     @Published var savedTeams: [SavedTeam] = []
     @Published var iCloudAvailable: Bool = false
+    @Published var useModernTeamSelection: Bool = UserDefaults.standard.bool(forKey: "UseModernTeamSelection")
     
     private var cancellables = Set<AnyCancellable>()
     private let storageKey = "AppConfigurationKey"
@@ -252,5 +253,10 @@ final class AppConfiguration: ObservableObject {
         let temp = homeTeam
         homeTeam = awayTeam
         awayTeam = temp
+    }
+
+    func toggleTeamSelectionStyle() {
+        useModernTeamSelection.toggle()
+        UserDefaults.standard.set(useModernTeamSelection, forKey: "UseModernTeamSelection")
     }
 }
